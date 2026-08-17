@@ -88,6 +88,32 @@
             return div.innerHTML;
         }
 
+        const MESSAGE_PREVIEW_LIMIT = 500;
+
+        function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                return navigator.clipboard.writeText(text);
+            }
+
+            return new Promise(function (resolve, reject) {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+
+                try {
+                    document.execCommand('copy') ? resolve() : reject(new Error('copy command failed'));
+                } catch (err) {
+                    reject(err);
+                } finally {
+                    document.body.removeChild(textarea);
+                }
+            });
+        }
+
         function renderEntries(payload) {
             entriesList.innerHTML = '';
 
@@ -101,18 +127,34 @@
 
                 const time = entry.timestamp ? new Date(entry.timestamp).toLocaleString() : '';
 
+                const isLong = entry.message.length > MESSAGE_PREVIEW_LIMIT;
+                const preview = isLong ? entry.message.slice(0, MESSAGE_PREVIEW_LIMIT) + '…' : entry.message;
+
                 el.innerHTML = `
                     <div class="entry-head">
                         <span class="badge ${levelClass(entry.level)}">${escapeHtml(entry.level)}</span>
                         <span class="entry-time">${escapeHtml(time)}</span>
                     </div>
-                    <div class="entry-message">${escapeHtml(entry.message)}</div>
+                    <div class="entry-message">${escapeHtml(preview)}</div>
                     <div class="entry-actions">
+                        ${isLong ? '<button type="button" class="toggle-message">Ver completo</button>' : ''}
                         ${entry.stack_trace ? '<button type="button" class="toggle-trace">Ver stack trace</button>' : ''}
                         <button type="button" class="copy-entry">Copiar</button>
                     </div>
                     ${entry.stack_trace ? `<pre class="stack-trace">${escapeHtml(entry.stack_trace)}</pre>` : ''}
                 `;
+
+                if (isLong) {
+                    const messageEl = el.querySelector('.entry-message');
+                    const toggleMessageBtn = el.querySelector('.toggle-message');
+                    let expanded = false;
+
+                    toggleMessageBtn.addEventListener('click', function () {
+                        expanded = !expanded;
+                        messageEl.textContent = expanded ? entry.message : preview;
+                        toggleMessageBtn.textContent = expanded ? 'Ver menos' : 'Ver completo';
+                    });
+                }
 
                 const toggleBtn = el.querySelector('.toggle-trace');
                 if (toggleBtn) {
@@ -123,7 +165,8 @@
                     });
                 }
 
-                el.querySelector('.copy-entry').addEventListener('click', function () {
+                el.querySelector('.copy-entry').addEventListener('click', function (e) {
+                    const button = e.currentTarget;
                     const text = [
                         time ? `[${time}]` : '',
                         entry.level.toUpperCase(),
@@ -132,7 +175,17 @@
                         entry.stack_trace ? '\nStack trace:\n' + entry.stack_trace : '',
                     ].filter(Boolean).join('\n');
 
-                    navigator.clipboard.writeText(text);
+                    const originalLabel = button.textContent;
+
+                    copyToClipboard(text).then(function () {
+                        button.textContent = 'Copiado!';
+                    }).catch(function () {
+                        button.textContent = 'Error al copiar';
+                    }).finally(function () {
+                        setTimeout(function () {
+                            button.textContent = originalLabel;
+                        }, 1500);
+                    });
                 });
 
                 entriesList.appendChild(el);
