@@ -67,6 +67,8 @@
         }
         button { cursor: pointer; }
         button:hover { border-color: var(--accent); }
+        button.danger { color: var(--error); border-color: var(--error); }
+        button.danger:hover { background: var(--error); color: #fff; }
         .file-item {
             display: block;
             padding: 8px 10px;

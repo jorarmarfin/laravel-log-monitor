@@ -32,6 +32,7 @@ final class LogViewerController extends Controller
             'pagination' => config('log-monitor.pagination', []),
             'allowDownload' => (bool) config('log-monitor.allow_download', true),
             'allowClear' => (bool) config('log-monitor.allow_clear', false),
+            'allowDelete' => (bool) config('log-monitor.allow_delete', false),
             'autoRefresh' => (bool) config('log-monitor.auto_refresh', false),
             'autoRefreshInterval' => (int) config('log-monitor.auto_refresh_interval', 10),
         ]);

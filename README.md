@@ -69,6 +69,8 @@ All routes are registered under the configurable prefix (`system/logs` by defaul
 | GET    | `/system/logs/{file}/download`   | Download a log file                  |
 | POST   | `/system/logs/{file}/clear`      | Truncate a log file                  |
 | POST   | `/system/logs/clear-all`         | Truncate every detected log file     |
+| DELETE | `/system/logs/{file}`            | Permanently delete a log file        |
+| DELETE | `/system/logs/delete-all`        | Permanently delete every log file    |
 
 `{file}` is always a bare filename resolved against the configured logs directory — never a path.
 
@@ -122,6 +124,7 @@ return [
     'pagination' => ['per_page' => 50, 'options' => [25, 50, 100, 250]],
     'allow_download' => true,
     'allow_clear' => false,
+    'allow_delete' => false,
     'auto_refresh' => false,
     'auto_refresh_interval' => 10,
     'limits' => ['max_bytes_scanned' => 10 * 1024 * 1024, 'max_entries' => 5000],
@@ -140,6 +143,7 @@ Path safety is the core design constraint of this package:
 - Only extensions listed in `allowed_extensions` are ever served.
 - Large files are never loaded fully into memory — reads are tail-bounded by `limits.max_bytes_scanned`.
 - Clearing a file (single or all) requires `allow_clear => true`, a `POST` request, CSRF protection, and always truncates (`file_put_contents($file, '')`) rather than deleting files.
+- Permanently deleting a file (single or all) is a **separate, stricter** opt-in: it requires `allow_delete => true` (disabled by default) plus a `DELETE` request and CSRF protection. It goes through the exact same `LogPathResolver` safety checks as every other action.
 - No file outside the logs directory is ever read, and no `.env` values are exposed.
 
 ## Usage
@@ -147,6 +151,8 @@ Path safety is the core design constraint of this package:
 Select a file from the sidebar (defaults to `laravel.log`, or the most recently modified file). Use the search box, level filter, and date range to narrow down entries; sort newest/oldest first; adjust the page size (25/50/100/250). Stack traces are collapsed by default — expand them or copy the whole formatted entry (handy for pasting into AI tools) with one click.
 
 When `allow_clear` is enabled, the toolbar shows two destructive actions, both requiring confirmation: **Limpiar** (truncate the currently selected file) and **Vaciar todos** (truncate every detected log file in one request). Neither ever deletes a file from disk.
+
+When `allow_delete` is also enabled, two additional, more destructive actions appear: **Eliminar archivo** and **Eliminar todos**, which permanently remove the file(s) from disk (`unlink`). Both require explicit confirmation. After a delete, the sidebar file list refreshes automatically and, if the currently viewed file was removed, the UI switches to another available file.
 
 ## Artisan commands
 
@@ -168,6 +174,12 @@ php artisan log-monitor:clear {file?} [--all] [--force]
 ```
 
 Clears the given file (or the default one), or every file with `--all`. Prompts for confirmation unless `--force` is passed, and refuses to run unless `allow_clear` is enabled.
+
+```bash
+php artisan log-monitor:delete {file?} [--all] [--force]
+```
+
+Permanently deletes the given file (or the default one) from disk, or every file with `--all`. Prompts for confirmation unless `--force` is passed, and refuses to run unless `allow_delete` is enabled.
 
 ## Testing
 

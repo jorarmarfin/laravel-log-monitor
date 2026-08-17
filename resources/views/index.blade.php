@@ -38,6 +38,10 @@
                     <button type="button" id="clear-btn">Limpiar</button>
                     <button type="button" id="clear-all-btn">Vaciar todos</button>
                 @endif
+                @if ($allowDelete)
+                    <button type="button" id="delete-btn" class="danger">Eliminar archivo</button>
+                    <button type="button" id="delete-all-btn" class="danger">Eliminar todos</button>
+                @endif
             </div>
 
             <div class="stats" id="stats-bar"></div>
@@ -304,6 +308,36 @@
             }).then(fetchEntries);
         });
 
+        document.getElementById('delete-btn')?.addEventListener('click', function () {
+            if (!state.file) return;
+
+            if (!confirm(`¿Seguro que deseas ELIMINAR el archivo "${state.file}" del disco? Esta acción no se puede deshacer.`)) {
+                return;
+            }
+
+            fetch(`${baseUrl}/${encodeURIComponent(state.file)}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                },
+            }).then(refreshFileList);
+        });
+
+        document.getElementById('delete-all-btn')?.addEventListener('click', function () {
+            if (!confirm('¿Seguro que deseas ELIMINAR TODOS los archivos de log del disco? Esta acción no se puede deshacer.')) {
+                return;
+            }
+
+            fetch(`${baseUrl}/delete-all`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                },
+            }).then(refreshFileList);
+        });
+
         function setupAutoRefresh() {
             const toggle = document.getElementById('auto-refresh-toggle');
 
@@ -325,21 +359,66 @@
             }
         }
 
-        document.querySelectorAll('.file-item').forEach(function (link) {
-            link.addEventListener('click', function (e) {
-                e.preventDefault();
-                state.file = link.dataset.file;
-                state.page = 1;
+        const fileListEl = document.getElementById('file-list');
 
-                document.querySelectorAll('.file-item').forEach(function (el) {
-                    el.classList.remove('active');
+        function bindFileItemClicks() {
+            fileListEl.querySelectorAll('.file-item').forEach(function (link) {
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    state.file = link.dataset.file;
+                    state.page = 1;
+
+                    fileListEl.querySelectorAll('.file-item').forEach(function (el) {
+                        el.classList.remove('active');
+                    });
+                    link.classList.add('active');
+
+                    fetchEntries();
                 });
-                link.classList.add('active');
-
-                fetchEntries();
             });
-        });
+        }
 
+        function renderFileList(files) {
+            fileListEl.innerHTML = files.length
+                ? files.map(function (file) {
+                    const active = file.identifier === state.file ? ' active' : '';
+                    const modified = file.modified_at ? new Date(file.modified_at).toLocaleString() : '';
+
+                    return `<a href="#" class="file-item${active}" data-file="${escapeHtml(file.identifier)}">
+                        ${escapeHtml(file.name)}
+                        <small>${escapeHtml(file.human_size)} · ${escapeHtml(modified)}</small>
+                    </a>`;
+                }).join('')
+                : '<p class="empty">No log files found.</p>';
+
+            bindFileItemClicks();
+        }
+
+        function refreshFileList() {
+            return fetch(`${baseUrl}/files`, { headers: { 'Accept': 'application/json' } })
+                .then(function (res) { return res.json(); })
+                .then(function (payload) {
+                    const files = payload.data || [];
+                    const stillExists = files.some(function (f) { return f.identifier === state.file; });
+
+                    if (!stillExists) {
+                        state.file = files.length ? files[0].identifier : null;
+                        state.page = 1;
+                    }
+
+                    renderFileList(files);
+
+                    if (state.file) {
+                        fetchEntries();
+                    } else {
+                        entriesList.innerHTML = '<p class="empty">No hay archivos de log.</p>';
+                        statsBar.innerHTML = '';
+                        pageIndicator.textContent = '';
+                    }
+                });
+        }
+
+        bindFileItemClicks();
         setupAutoRefresh();
         fetchEntries();
     })();

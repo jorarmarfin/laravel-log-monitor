@@ -52,4 +52,22 @@ final class FileLogRepository implements LogRepositoryInterface
 
         return $files;
     }
+
+    public function delete(LogFile $file): void
+    {
+        if (is_file($file->path)) {
+            unlink($file->path);
+        }
+    }
+
+    public function deleteAll(): array
+    {
+        $files = $this->allFiles();
+
+        foreach ($files as $file) {
+            $this->delete($file);
+        }
+
+        return $files;
+    }
 }

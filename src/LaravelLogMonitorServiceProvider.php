@@ -7,6 +7,7 @@ namespace Luiscamp\LaravelLogMonitor;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Luiscamp\LaravelLogMonitor\Console\LogMonitorClearCommand;
+use Luiscamp\LaravelLogMonitor\Console\LogMonitorDeleteCommand;
 use Luiscamp\LaravelLogMonitor\Console\LogMonitorStatusCommand;
 use Luiscamp\LaravelLogMonitor\Contracts\LogParserInterface;
 use Luiscamp\LaravelLogMonitor\Contracts\LogReaderInterface;
@@ -69,6 +70,7 @@ final class LaravelLogMonitorServiceProvider extends ServiceProvider
             $this->commands([
                 LogMonitorStatusCommand::class,
                 LogMonitorClearCommand::class,
+                LogMonitorDeleteCommand::class,
             ]);
         }
     }

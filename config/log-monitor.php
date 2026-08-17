@@ -98,6 +98,20 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Delete
+    |--------------------------------------------------------------------------
+    |
+    | Whether log files can be permanently deleted from disk (unlink),
+    | as opposed to just truncated by allow_clear. This is more
+    | destructive and irreversible; keep it disabled unless you really
+    | need it.
+    |
+    */
+
+    'allow_delete' => false,
+
+    /*
+    |--------------------------------------------------------------------------
     | Auto refresh
     |--------------------------------------------------------------------------
     */

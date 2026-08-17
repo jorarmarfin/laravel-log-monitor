@@ -27,4 +27,16 @@ interface LogRepositoryInterface
      * @return array<int, LogFile>
      */
     public function clearAll(): array;
+
+    /**
+     * Permanently remove a log file from disk.
+     */
+    public function delete(LogFile $file): void;
+
+    /**
+     * Permanently remove every detected log file from disk.
+     *
+     * @return array<int, LogFile>
+     */
+    public function deleteAll(): array;
 }
