@@ -1,0 +1,57 @@
+{
+    "name": "luiscamp/laravel-log-monitor",
+    "description": "View, search, filter and manage Laravel log files from a modern, secure web interface.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "logs",
+        "log-viewer",
+        "monolog",
+        "monitor"
+    ],
+    "authors": [
+        {
+            "name": "Luis Mayta",
+            "email": "luis.mayta@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^11.0|^12.0|^13.0",
+        "illuminate/routing": "^11.0|^12.0|^13.0",
+        "illuminate/console": "^11.0|^12.0|^13.0",
+        "nesbot/carbon": "^2.72|^3.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0|^10.0",
+        "phpunit/phpunit": "^11.0",
+        "laravel/pint": "^1.17"
+    },
+    "autoload": {
+        "psr-4": {
+            "Luiscamp\\LaravelLogMonitor\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Luiscamp\\LaravelLogMonitor\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "format": "pint"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Luiscamp\\LaravelLogMonitor\\LaravelLogMonitorServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "config": {
+        "sort-packages": true
+    }
+}
