@@ -193,8 +193,23 @@
             pageIndicator.textContent = `Página ${payload.page} de ${totalPages} (${payload.total} entradas)`;
 
             statsBar.innerHTML = Object.entries(payload.stats).map(function ([level, count]) {
-                return `<span><strong class="badge ${levelClass(level)}">${level.toUpperCase()}</strong> ${count}</span>`;
+                const active = state.level === level ? ' active' : '';
+                return `<button type="button" class="stat-filter${active}" data-level="${level}"><strong class="badge ${levelClass(level)}">${level.toUpperCase()}</strong> ${count}</button>`;
             }).join('');
+
+            statsBar.querySelectorAll('.stat-filter').forEach(function (statButton) {
+                statButton.addEventListener('click', function () {
+                    const level = statButton.dataset.level;
+
+                    state.level = state.level === level ? 'all' : level;
+                    state.page = 1;
+
+                    const levelSelect = document.getElementById('level-select');
+                    if (levelSelect) levelSelect.value = state.level;
+
+                    fetchEntries();
+                });
+            });
         }
 
         function fetchEntries() {

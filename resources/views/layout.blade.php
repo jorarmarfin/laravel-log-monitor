@@ -127,7 +127,7 @@
         .stats {
             display: flex;
             flex-wrap: wrap;
-            gap: 16px;
+            gap: 8px;
             padding: 10px 16px;
             border: 1px solid var(--border);
             border-radius: 6px;
@@ -135,6 +135,17 @@
             font-size: 13px;
             margin-bottom: 12px;
         }
+        .stat-filter {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            padding: 4px 8px;
+        }
+        .stat-filter:hover { border-color: var(--border); background: var(--bg); }
+        .stat-filter.active { border-color: var(--accent); background: var(--bg); }
         .pagination { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
         .empty { color: var(--text-muted); padding: 24px; text-align: center; }
     </style>
