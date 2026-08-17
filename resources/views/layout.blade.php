@@ -124,14 +124,16 @@
             margin-top: 6px;
         }
         .stack-trace.open { display: block; }
-        footer.stats {
+        .stats {
             display: flex;
             flex-wrap: wrap;
             gap: 16px;
             padding: 10px 16px;
-            border-top: 1px solid var(--border);
+            border: 1px solid var(--border);
+            border-radius: 6px;
             background: var(--panel);
             font-size: 13px;
+            margin-bottom: 12px;
         }
         .pagination { display: flex; gap: 8px; align-items: center; margin-top: 12px; }
         .empty { color: var(--text-muted); padding: 24px; text-align: center; }

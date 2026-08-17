@@ -40,6 +40,8 @@
                 @endif
             </div>
 
+            <div class="stats" id="stats-bar"></div>
+
             <div id="entries-list"></div>
 
             <div class="pagination">
@@ -48,10 +50,6 @@
                 <button type="button" id="next-page">Siguiente &raquo;</button>
             </div>
         </main>
-    </div>
-
-    <div id="stats-container">
-        <footer class="stats" id="stats-bar"></footer>
     </div>
 
     <form id="clear-form" method="POST" style="display:none;">
