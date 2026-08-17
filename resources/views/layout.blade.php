@@ -155,7 +155,12 @@
 <body>
     <header>
         <h1>Laravel Log Monitor</h1>
-        <span id="environment-badge" class="entry-time">{{ app()->environment() }}</span>
+        <span style="display:flex;align-items:center;gap:12px;">
+            @isset($packageVersion)
+                <span class="entry-time" title="luiscamp/laravel-log-monitor">v{{ ltrim($packageVersion, 'v') }}</span>
+            @endisset
+            <span id="environment-badge" class="entry-time">{{ app()->environment() }}</span>
+        </span>
     </header>
     @yield('content')
 </body>

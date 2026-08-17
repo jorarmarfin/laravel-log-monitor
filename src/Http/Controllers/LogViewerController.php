@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Luiscamp\LaravelLogMonitor\Http\Controllers;
 
+use Composer\InstalledVersions;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -11,6 +12,7 @@ use Luiscamp\LaravelLogMonitor\Contracts\LogParserInterface;
 use Luiscamp\LaravelLogMonitor\Contracts\LogRepositoryInterface;
 use Luiscamp\LaravelLogMonitor\Exceptions\InvalidLogFileException;
 use Luiscamp\LaravelLogMonitor\Services\LogSearchService;
+use Throwable;
 
 final class LogViewerController extends Controller
 {
@@ -35,7 +37,25 @@ final class LogViewerController extends Controller
             'allowDelete' => (bool) config('log-monitor.allow_delete', false),
             'autoRefresh' => (bool) config('log-monitor.auto_refresh', false),
             'autoRefreshInterval' => (int) config('log-monitor.auto_refresh_interval', 10),
+            'packageVersion' => $this->resolvePackageVersion(),
         ]);
+    }
+
+    private function resolvePackageVersion(): ?string
+    {
+        if (! class_exists(InstalledVersions::class)) {
+            return null;
+        }
+
+        try {
+            if (! InstalledVersions::isInstalled('luiscamp/laravel-log-monitor')) {
+                return null;
+            }
+
+            return InstalledVersions::getPrettyVersion('luiscamp/laravel-log-monitor');
+        } catch (Throwable) {
+            return null;
+        }
     }
 
     public function files(): JsonResponse
